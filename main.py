@@ -47,13 +47,35 @@ while j<total_child_divs-3:
         win = driver.find_element(By.XPATH, '//*[@id="wpt'+str(j)+'"]/table/tbody/tr[' + str(x) + ']/td[5]').text
         place = driver.find_element(By.XPATH, '//*[@id="wpt'+str(j)+'"]/table/tbody/tr[' + str(x) + ']/td[6]').text
 
-        driver.get("https://hkjc.ngt.hk/receive_data.php?page_no="+str(j)+"&sl="+str(sl)+"&horse_name="+str(horsename)+"&win="+str(win)+"&place="+str(place))
-        time.sleep(2)
+        url = "http://hkjc.frogbid.xyz/receive_data.php?page_no="+str(j)+"&sl="+str(sl)+"&horse_name="+str(horsename)+"&win="+str(win)+"&place="+str(place)  # Replace with your desired URL
 
-        driver.get("https://bet.hkjc.com/racing/pages/odds_wpq.aspx?lang=ch&raceno=" + str(j))
-        time.sleep(2)
+        # Set headers with a User-Agent and any additional required headers
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "Other-Header": "Value"
+        }
+
+        # Set up a session to manage cookies
+        session = requests.Session()
+
+        # Perform any necessary login or authentication steps
+        # ...
+
+        try:
+            # Send the GET request with headers and cookies
+            response = session.get(url, headers=headers)
+
+            # Check the response status code
+            if response.status_code == 200:
+                # Successful response
+                print(response.text+" "+sl)
+            else:
+                print(f"Request failed with status code: {response.status_code}")
+
+        except requests.exceptions.RequestException as e:
+            # Error occurred during the request
+            print("An error occurred:", e)
+
         x=x+1
 
     j=j+1
-
-    print('\n\n')
