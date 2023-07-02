@@ -2,12 +2,12 @@ from selenium.webdriver.common.by import By
 from selenium import webdriver
 import time
 from bs4 import BeautifulSoup
+import requests
 
 driver = webdriver.Chrome()
 driver.maximize_window()
 
-
-driver.get("https://bet.hkjc.com/racing/pages/odds_wpq.aspx?lang=en&raceno=1")
+driver.get("https://bet.hkjc.com/racing/pages/odds_wpq.aspx?lang=ch&raceno=1")
 time.sleep(5)
 
 rows = driver.find_element(By.XPATH, '//*[@id="container"]/div/div/div[2]/div[2]').get_attribute("outerHTML")
@@ -26,9 +26,9 @@ total_child_divs = len(child_divs)
 
 j=1
 
-while j<total_child_divs-1:
+while j<total_child_divs-3:
 
-    driver.get("https://bet.hkjc.com/racing/pages/odds_wpq.aspx?lang=en&raceno="+str(j))
+    driver.get("https://bet.hkjc.com/racing/pages/odds_wpq.aspx?lang=ch&raceno="+str(j))
     time.sleep(2)
 
     rows = driver.find_elements(By.XPATH, '//*[@id="wpt'+str(j)+'"]/table/tbody/tr')
@@ -47,7 +47,11 @@ while j<total_child_divs-1:
         win = driver.find_element(By.XPATH, '//*[@id="wpt'+str(j)+'"]/table/tbody/tr[' + str(x) + ']/td[5]').text
         place = driver.find_element(By.XPATH, '//*[@id="wpt'+str(j)+'"]/table/tbody/tr[' + str(x) + ']/td[6]').text
 
-        print('Win: '+win+' Place: '+place)
+        driver.get("https://hkjc.ngt.hk/receive_data.php?page_no="+str(j)+"&sl="+str(sl)+"&horse_name="+str(horsename)+"&win="+str(win)+"&place="+str(place))
+        time.sleep(2)
+
+        driver.get("https://bet.hkjc.com/racing/pages/odds_wpq.aspx?lang=ch&raceno=" + str(j))
+        time.sleep(2)
         x=x+1
 
     j=j+1
