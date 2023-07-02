@@ -37,9 +37,28 @@ while j<total_child_divs-3:
     for data in rows:
         i = i + 1
 
-    print('Race '+str(j)+' : rows '+str(i))
+    print('Race '+str(j)+' : rows '+str(i-1))
 
     x = 1
+
+    if i==1:
+        url = "http://localhost/W-Python-Data/no_rows.php?page_no=" + str(j) +  "&rows=" + str(i)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "Other-Header": "Value"
+        }
+
+        session = requests.Session()
+
+        try:
+            response = session.get(url, headers=headers)
+            if response.status_code == 200:
+                print(response.text)
+            else:
+                print(f"Request failed with status code: {response.status_code}")
+
+        except requests.exceptions.RequestException as e:
+            print("An error occurred:", e)
 
     while x<i-1:
         sl = driver.find_element(By.XPATH, '//*[@id="wpt'+str(j)+'"]/table/tbody/tr[' + str(x) + ']/td[1]').text
@@ -47,7 +66,7 @@ while j<total_child_divs-3:
         win = driver.find_element(By.XPATH, '//*[@id="wpt'+str(j)+'"]/table/tbody/tr[' + str(x) + ']/td[5]').text
         place = driver.find_element(By.XPATH, '//*[@id="wpt'+str(j)+'"]/table/tbody/tr[' + str(x) + ']/td[6]').text
 
-        url = "http://hkjc.frogbid.xyz/receive_data.php?page_no="+str(j)+"&sl="+str(sl)+"&horse_name="+str(horsename)+"&win="+str(win)+"&place="+str(place)  # Replace with your desired URL
+        url = "http://localhost/W-Python-Data/receive_data.php?page_no="+str(j)+"&sl="+str(sl)+"&horse_name="+str(horsename)+"&win="+str(win)+"&place="+str(place) +"&rows="+str(i)  # Replace with your desired URL
 
         # Set headers with a User-Agent and any additional required headers
         headers = {
