@@ -3,13 +3,15 @@ from selenium import webdriver
 import time
 from bs4 import BeautifulSoup
 import requests
+import subprocess
 
 driver = webdriver.Chrome()
-driver.maximize_window()
+driver.minimize_window()
 
 collect_url = "https://bet.hkjc.com/racing/pages/odds_wpq.aspx?lang=ch&raceno="
 
-insert_url = "http://localhost/W-Python-Data/"
+insert_url = "https://hkjc.ngt.hk/"
+
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -36,73 +38,61 @@ child_divs = parent_div.find_all('div')
 # Count the total number of <div> child elements
 total_child_divs = len(child_divs)
 
-j = 1
+start_time = time.time()
 
-while j < total_child_divs - 1:
+hour = 12
 
-    driver.get(collect_url + str(j))
-    time.sleep(2)
+seconds = hour*3600
 
-    rows = driver.find_elements(By.XPATH, '//*[@id="wpt' + str(j) + '"]/table/tbody/tr')
+while True:
+    current_time = time.time()
+    elapsed_time = current_time - start_time
 
-    i = 1
-    for data in rows:
-        i = i + 1
+    j = 1
 
-    print('Race ' + str(j) + ' : rows ' + str(i - 1))
+    while j < total_child_divs - 1:
 
-    x = 1
+        driver.get(collect_url + str(j))
+        time.sleep(2)
 
-    if i == 1:
-        url = insert_url + "no_rows.php?page_no=" + str(j) + "&rows=" + str(i)
+        rows = driver.find_elements(By.XPATH, '//*[@id="wpt' + str(j) + '"]/table/tbody/tr')
 
-        try:
-            response = session.get(url, headers=headers)
-            if response.status_code == 200:
-                print(response.text)
-            else:
-                print(f"Request failed with status code: {response.status_code}")
+        i = 1
+        for data in rows:
+            i = i + 1
 
-        except requests.exceptions.RequestException as e:
-            print("An error occurred:", e)
+        print('Race ' + str(j) + ' : rows ' + str(i - 1))
 
-    while x < i - 1:
-        sl = driver.find_element(By.XPATH, '//*[@id="wpt' + str(j) + '"]/table/tbody/tr[' + str(x) + ']/td[1]').text
-        horsename = driver.find_element(By.XPATH,
-                                        '//*[@id="wpt' + str(j) + '"]/table/tbody/tr[' + str(x) + ']/td[4]').text
-        win = driver.find_element(By.XPATH, '//*[@id="wpt' + str(j) + '"]/table/tbody/tr[' + str(x) + ']/td[5]').text
-        place = driver.find_element(By.XPATH, '//*[@id="wpt' + str(j) + '"]/table/tbody/tr[' + str(x) + ']/td[6]').text
+        x = 1
 
-        url = insert_url + "receive_data.php?page_no=" + str(j) + "&sl=" + str(sl) + "&horse_name=" + str(
-            horsename) + "&win=" + str(win) + "&place=" + str(place) + "&rows=" + str(
-            i)  # Replace with your desired URL
+        while x < i - 1:
+            sl = driver.find_element(By.XPATH, '//*[@id="wpt' + str(j) + '"]/table/tbody/tr[' + str(x) + ']/td[1]').text
+            horsename = driver.find_element(By.XPATH,
+                                            '//*[@id="wpt' + str(j) + '"]/table/tbody/tr[' + str(x) + ']/td[4]').text
+            win = driver.find_element(By.XPATH, '//*[@id="wpt' + str(j) + '"]/table/tbody/tr[' + str(x) + ']/td[5]').text
+            place = driver.find_element(By.XPATH, '//*[@id="wpt' + str(j) + '"]/table/tbody/tr[' + str(x) + ']/td[6]').text
 
-        try:
-            response = session.get(url, headers=headers)
+            url = insert_url + "receive_data.php?page_no=" + str(j) + "&sl=" + str(sl) + "&horse_name=" + str(
+                horsename) + "&win=" + str(win) + "&place=" + str(place) + "&rows=" + str(
+                i)  # Replace with your desired URL
 
-            if response.status_code == 200:
-                print(response.text + " " + sl)
-            else:
-                print(f"Request failed with status code: {response.status_code}")
+            try:
+                response = session.get(url, headers=headers)
 
-        except requests.exceptions.RequestException as e:
-            # Error occurred during the request
-            print("An error occurred:", e)
+                if response.status_code == 200:
+                    print(response.text + " " + sl)
+                else:
+                    print(f"Request failed with status code: {response.status_code}")
 
-        x = x + 1
+            except requests.exceptions.RequestException as e:
+                # Error occurred during the request
+                print("An error occurred:", e)
 
-    j = j + 1
+            x = x + 1
 
-url = insert_url + "no_page.php?page_no=" + str(j)
+        j = j + 1
 
-try:
-    response = session.get(url, headers=headers)
-
-    if response.status_code == 200:
-        print(response.text)
-    else:
-        print(f"Request failed with status code: {response.status_code}")
-
-except requests.exceptions.RequestException as e:
-    # Error occurred during the request
-    print("An error occurred:", e)
+    if elapsed_time > seconds:
+        print("Finished iterating in: " + str(int(elapsed_time))  + " seconds")
+        subprocess.call(["shutdown", "-f", "-s", "-t", "1"])
+        break

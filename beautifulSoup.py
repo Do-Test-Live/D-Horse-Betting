@@ -1,21 +1,46 @@
 import requests
-import time
+from lxml import html
 
-j=1
+# Create a session object
+session = requests.Session()
 
-while j<10:
-    url = "https://bet.hkjc.com/racing/getJSON.aspx?type=winplaodds&date=2023-06-28&venue=HV&start="+str(j)+"&end="+str(j)
+# Define headers including User-Agent and Other-Header
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Other-Header": "Value"
+}
 
-    response = requests.get(url)
+# Update session headers with desired headers
+session.headers.update(headers)
 
-    if response.status_code == 200:
-        time.sleep(1)
+# Define the cookies
+cookies = {
+    'cookie_name': 'cookie_value',
+    # Add more cookies if needed
+}
 
-        json_data = response.json()
-        print(json_data)
+# Set the cookies in the session
+session.cookies.update(cookies)
 
-    else:
-        print("Failed to retrieve JSON data. Status code:", response.status_code)
+# Send a GET request to the webpage
+response = session.get("https://bet.hkjc.com/racing/pages/odds_wpq.aspx?lang=ch&raceno=1")
 
-    j = j + 1
-    print('\n')
+# Check if cookies are enabled
+cookies_enabled = session.cookies
+
+# Return the appropriate message
+if cookies_enabled:
+    message = "Cookies are enabled"
+    try:
+        if response.status_code == 200:
+            tree = html.fromstring(response.text)
+            print(response.text)
+
+    except requests.exceptions.RequestException as e:
+        print("An error occurred:", e)
+else:
+    message = "Cookies are not enabled"
+
+# Print or return the message as needed
+print(message)
+
